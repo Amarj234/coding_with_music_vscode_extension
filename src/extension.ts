@@ -226,7 +226,7 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
-    <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
+    <iframe src="${this._getIframeSrc().iframeSrc}" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
     
     <script>
         // Get VS Code API

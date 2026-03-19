@@ -29,8 +29,17 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "coding-music",
+          "title": "Coding Music",
+          "icon": "$(music)"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "coding-music": [
         {
           "type": "webview",
           "id": "coding-music-player",

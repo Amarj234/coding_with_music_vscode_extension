@@ -234,6 +234,24 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
         
         console.log('[WebView Bridge] Initializing message bridge for YouTube Music extension');
         
+        // Listen for messages from VS Code
+        window.addEventListener('message', (event) => {
+            const message = event.data;
+            if (message.command === 'togglePlay') {
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    // This works if the URL has enablejsapi=1
+                    const apiMessage = isPlaying ? 
+                        {"event":"command","func":"pauseVideo","args":""} : 
+                        {"event":"command","func":"playVideo","args":""};
+                    iframe.contentWindow.postMessage(JSON.stringify(apiMessage), '*');
+                    isPlaying = !isPlaying;
+                }
+            }
+        });
+
+        let isPlaying = true; // Default to true if autoplay is on
+
         // Listen for messages from the iframe (your website)
         window.addEventListener('message', (event) => {
             console.log('[WebView Bridge] Received postMessage event:', {

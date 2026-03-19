@@ -1,4 +1,17 @@
 import * as vscode from 'vscode';
+/*
+//create envConfig.ts that contains the environment variables for the extension.
+export interface EnvConfig {
+  MUSIC_PLAYER_URL: string;
+  [key: string]: any;
+}
+
+export function getEnvConfig(): EnvConfig {
+  return {
+    MUSIC_PLAYER_URL: 'http://localhost:3000' 
+  };
+} 
+*/
 import { getEnvConfig } from './envConfig';
 
 let statusBarItem: vscode.StatusBarItem | undefined = undefined;
@@ -6,18 +19,8 @@ let statusBarItem: vscode.StatusBarItem | undefined = undefined;
 class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'youtube-music-player';
     private _view?: vscode.WebviewView;
-    private _customUrl?: string;
 
     constructor(private readonly _extensionUri: vscode.Uri) {}
-
-    public setCustomUrl(url: string) {
-        this._customUrl = url;
-        this.refresh();
-    }
-
-    public getCustomUrl(): string | undefined {
-        return this._customUrl;
-    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -73,7 +76,7 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showErrorMessage(`YouTube Music Error: ${message.text}`);
                         console.log('[Extension] ✅ Error message displayed successfully');
                     } else {
-                        console.warn('[Extension] ❌ Error message missing text field');
+                        console.warn('[Extension] ❌ Info message missing text field');
                     }
                     break;
                 case 'warning':
@@ -82,7 +85,7 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
                         vscode.window.showWarningMessage(`YouTube Music Warning: ${message.text}`);
                         console.log('[Extension] ✅ Warning message displayed successfully');
                     } else {
-                        console.warn('[Extension] ❌ Warning message missing text field');
+                        console.warn('[Extension] ❌ Info message missing text field');
                     }
                     break;
                 case 'nowPlaying':
@@ -176,12 +179,6 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
         );
     }
 
-    public togglePlay() {
-        if (this._view) {
-            this._view.webview.postMessage({ command: 'togglePlay' });
-        }
-    }
-
     public refresh() {
         if (this._view) {
             try {
@@ -193,10 +190,10 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
         }
     }
     private _getIframeSrc(): { url: string, iframeSrc: string } {
-        const URL = this._customUrl || getEnvConfig().MUSIC_PLAYER_URL || '';
+        const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
         return {
             url: URL,
-            iframeSrc: URL, 
+            iframeSrc: `${URL}?_t=${Date.now()}&vscode=true`,
         }
     }
 
@@ -206,7 +203,7 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; frame-src *; img-src https: data: vscode-resource:; media-src https: data: blob:; connect-src https: wss:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data: vscode-resource:; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; media-src https: data: blob:; connect-src https: wss:; font-src 'self' data: https:; child-src 'none'; frame-src ${this._getIframeSrc().url}">
     <title>YouTube Music Player</title>
     <style>
         html, body {
@@ -225,7 +222,7 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
-    <iframe src="${this._getIframeSrc().iframeSrc}" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
+    <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
     
     <script>
         // Get VS Code API
@@ -233,24 +230,6 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
         
         console.log('[WebView Bridge] Initializing message bridge for YouTube Music extension');
         
-        // Listen for messages from VS Code
-        window.addEventListener('message', (event) => {
-            const message = event.data;
-            if (message.command === 'togglePlay') {
-                const iframe = document.querySelector('iframe');
-                if (iframe && iframe.contentWindow) {
-                    // This works if the URL has enablejsapi=1
-                    const apiMessage = isPlaying ? 
-                        {"event":"command","func":"pauseVideo","args":""} : 
-                        {"event":"command","func":"playVideo","args":""};
-                    iframe.contentWindow.postMessage(JSON.stringify(apiMessage), '*');
-                    isPlaying = !isPlaying;
-                }
-            }
-        });
-
-        let isPlaying = true; // Default to true if autoplay is on
-
         // Listen for messages from the iframe (your website)
         window.addEventListener('message', (event) => {
             console.log('[WebView Bridge] Received postMessage event:', {
@@ -325,36 +304,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('youtube-music-player.focus');
         });
 
-        const changeUrlCommand = vscode.commands.registerCommand('youtubeMusicStreamer.changeUrl', async () => {
-            const currentUrl = provider.getCustomUrl() || getEnvConfig().MUSIC_PLAYER_URL;
-            let newUrl = await vscode.window.showInputBox({
-                prompt: 'Enter a YouTube link or any website',
-                value: currentUrl,
-                placeHolder: 'e.g. https://www.youtube.com/watch?v=...'
-            });
-            
-            if (newUrl) {
-                // Auto-convert youtu.be sharing links
-                if (newUrl.includes('youtu.be/')) {
-                    const id = newUrl.split('youtu.be/')[1].split('?')[0];
-                    newUrl = `https://www.youtube.com/embed/${id}`;
-                } 
-                // Auto-convert standard watch links
-                else if (newUrl.includes('youtube.com/watch?v=')) {
-                    const id = newUrl.split('v=')[1].split('&')[0];
-                    newUrl = `https://www.youtube.com/embed/${id}`;
-                }
-                
-                provider.setCustomUrl(newUrl);
-                vscode.window.showInformationMessage(`Music source updated!`);
-            }
-        });
-
-        const togglePlayCommand = vscode.commands.registerCommand('youtubeMusicStreamer.togglePlay', () => {
-            provider.togglePlay();
-        });
-
-        context.subscriptions.push(refreshCommand, openPlayerCommand, changeUrlCommand, togglePlayCommand, statusBarItem);
+        context.subscriptions.push(refreshCommand, openPlayerCommand, statusBarItem);
 
         console.log('✅ YouTube Music Streamer extension activated successfully');
     } catch (error) {

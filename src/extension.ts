@@ -194,10 +194,9 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
     }
     private _getIframeSrc(): { url: string, iframeSrc: string } {
         const URL = this._customUrl || getEnvConfig().MUSIC_PLAYER_URL || '';
-        const base = URL.includes('?') ? `${URL}&` : `${URL}?`;
         return {
             url: URL,
-            iframeSrc: `${base}vscode=true&_t=${Date.now()}`, 
+            iframeSrc: URL, 
         }
     }
 

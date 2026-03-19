@@ -24,95 +24,53 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onView:coding-music-player",
-    "onCommand:codingWithMusic.openPlayer"
+    "onView:youtube-music-player",
+    "onCommand:youtubeMusicStreamer.openPlayer"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "coding-music",
-          "title": "Coding Music",
-          "icon": "$(music)"
-        }
-      ]
-    },
     "views": {
-      "coding-music": [
+      "explorer": [
         {
           "type": "webview",
-          "id": "coding-music-player",
-          "name": "Coding Music Player",
-          "when": "true",
-          "visibility": "visible"
+          "id": "youtube-music-player",
+          "name": "YouTube Music Player"
         }
       ]
     },
     "commands": [
       {
-        "command": "codingWithMusic.openPlayer",
-        "title": "Open Coding Music Player",
-        "category": "Coding with Music",
+        "command": "youtubeMusicStreamer.openPlayer",
+        "title": "Open YouTube Music Player",
+        "category": "YouTube Music",
         "icon": "$(play)"
       },
       {
-        "command": "codingWithMusic.refreshPlayer",
+        "command": "youtubeMusicStreamer.refreshPlayer",
         "title": "Refresh",
         "icon": "$(refresh)"
-      },
-      {
-        "command": "codingWithMusic.togglePlay",
-        "title": "Toggle Play/Pause",
-        "category": "Coding with Music"
-      },
-      {
-        "command": "codingWithMusic.toggleVisibility",
-        "title": "Toggle Hide/Unhide Player",
-        "category": "Coding with Music"
-      },
-      {
-        "command": "codingWithMusic.changeUrl",
-        "title": "Change Music URL",
-        "category": "Coding with Music",
-        "icon": "$(edit)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "codingWithMusic.refreshPlayer",
-          "when": "view == coding-music-player",
-          "group": "navigation@1"
-        },
-        {
-          "command": "codingWithMusic.changeUrl",
-          "when": "view == coding-music-player",
-          "group": "navigation@2"
+          "command": "youtubeMusicStreamer.refreshPlayer",
+          "group": "navigation",
+          "when": "view == youtube-music-player"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "codingWithMusic.openPlayer",
+        "command": "youtubeMusicStreamer.openPlayer",
         "key": "ctrl+shift+y",
         "mac": "cmd+shift+y"
-      },
-      {
-        "command": "codingWithMusic.togglePlay",
-        "key": "alt+p",
-        "mac": "alt+p"
-      },
-      {
-        "command": "codingWithMusic.toggleVisibility",
-        "key": "alt+h",
-        "mac": "alt+h"
       }
     ],
     "configuration": {
-      "title": "Coding with Music",
+      "title": "YouTube Music Streamer",
       "properties": {
-        "codingWithMusic.maxResults": {
+        "youtubeMusicStreamer.maxResults": {
           "type": "number",
           "default": 25,
           "minimum": 5,
@@ -120,13 +78,13 @@
           "description": "Maximum number of results to fetch per request",
           "order": 1
         },
-        "codingWithMusic.region": {
+        "youtubeMusicStreamer.region": {
           "type": "string",
           "default": "US",
           "description": "Region code for localized content (e.g., US, IN, GB)",
           "order": 2
         },
-        "codingWithMusic.autoStart": {
+        "youtubeMusicStreamer.autoStart": {
           "type": "boolean",
           "default": false,
           "description": "Automatically open the player when VS Code starts",

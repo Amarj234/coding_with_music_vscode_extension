@@ -3,21 +3,11 @@ import { getEnvConfig } from './envConfig';
 
 let statusBarItem: vscode.StatusBarItem | undefined = undefined;
 
-class CodingMusicViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = 'coding-music-player';
+class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'youtube-music-player';
     private _view?: vscode.WebviewView;
-    private _customUrl?: string;
 
     constructor(private readonly _extensionUri: vscode.Uri) {}
-
-    public setCustomUrl(url: string) {
-        this._customUrl = url;
-        this.refresh();
-    }
-
-    public getCustomUrl(): string | undefined {
-        return this._customUrl;
-    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -40,7 +30,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.html = `
                 <html>
                 <body>
-                    <h3>Error loading Coding Music Player</h3>
+                    <h3>Error loading YouTube Music Player</h3>
                     <p>Failed to load the player interface. Please try refreshing.</p>
                     <button onclick="location.reload()">Refresh</button>
                 </body>
@@ -61,7 +51,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'info':
                     console.log('[Extension] Processing info message:', message.text);
                     if (message.text) {
-                        vscode.window.showInformationMessage(`Coding with Music: ${message.text}`);
+                        vscode.window.showInformationMessage(`YouTube Music: ${message.text}`);
                         console.log('[Extension] ✅ Info message displayed successfully');
                     } else {
                         console.warn('[Extension] ❌ Info message missing text field');
@@ -70,7 +60,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'error':
                     console.log('[Extension] Processing error message:', message.text);
                     if (message.text) {
-                        vscode.window.showErrorMessage(`Coding with Music Error: ${message.text}`);
+                        vscode.window.showErrorMessage(`YouTube Music Error: ${message.text}`);
                         console.log('[Extension] ✅ Error message displayed successfully');
                     } else {
                         console.warn('[Extension] ❌ Error message missing text field');
@@ -79,7 +69,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'warning':
                     console.log('[Extension] Processing warning message:', message.text);
                     if (message.text) {
-                        vscode.window.showWarningMessage(`Coding with Music Warning: ${message.text}`);
+                        vscode.window.showWarningMessage(`YouTube Music Warning: ${message.text}`);
                         console.log('[Extension] ✅ Warning message displayed successfully');
                     } else {
                         console.warn('[Extension] ❌ Warning message missing text field');
@@ -92,6 +82,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                         originalTitle: message.originalTitle
                     });
                     if (statusBarItem) {
+                        // Use the title provided by iframe (already formatted with artist if available)
                         const displayText = message.title || (message.artist && message.originalTitle ? 
                             `${message.artist} - ${message.originalTitle}` : message.originalTitle || 'Unknown Track');
                         statusBarItem.text = `$(music) ${displayText}`;
@@ -104,8 +95,8 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'stopped':
                     console.log('[Extension] Processing stopped message');
                     if (statusBarItem) {
-                        statusBarItem.text = "$(music) Coding with Music";
-                        statusBarItem.tooltip = "Coding Music Player";
+                        statusBarItem.text = "$(music) YouTube Music";
+                        statusBarItem.tooltip = "YouTube Music Player";
                         console.log('[Extension] ✅ Status bar reset to default');
                     } else {
                         console.error('[Extension] ❌ Status bar item not available');
@@ -114,7 +105,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'getConfig':
                     console.log('[Extension] Processing getConfig message');
                     try {
-                        const currentConfig = vscode.workspace.getConfiguration('codingWithMusic');
+                        const currentConfig = vscode.workspace.getConfiguration('youtubeMusicStreamer');
                         const config = {
                             maxResults: currentConfig.get<number>('maxResults', 25),
                             region: currentConfig.get<string>('region', 'US')
@@ -131,7 +122,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 case 'openSettings':
                     console.log('[Extension] Processing openSettings message');
                     try {
-                        vscode.commands.executeCommand('workbench.action.openSettings', 'codingWithMusic');
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'youtubeMusicStreamer');
                         console.log('[Extension] ✅ Settings opened successfully');
                     } catch (error) {
                         console.error('[Extension] ❌ Failed to open settings:', error);
@@ -145,8 +136,11 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                     });
                     if (message.url) {
                         try {
+                            // Validate URL format
                             const url = new URL(message.url);
                             console.log('[Extension] Opening URL in external browser:', url.toString());
+                            
+                            // Open URL in external browser
                             vscode.env.openExternal(vscode.Uri.parse(url.toString()));
                             console.log('[Extension] ✅ URL opened successfully in external browser');
                         } catch (error) {
@@ -154,11 +148,11 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                                 url: message.url,
                                 error: error
                             });
-                            vscode.window.showErrorMessage(`Coding with Music: Invalid URL - ${message.url}`);
+                            vscode.window.showErrorMessage(`YouTube Music: Invalid URL - ${message.url}`);
                         }
                     } else {
                         console.warn('[Extension] ❌ Click message missing URL field:', message);
-                        vscode.window.showWarningMessage('Coding with Music: No URL provided for external link');
+                        vscode.window.showWarningMessage('YouTube Music: No URL provided for external link');
                     }
                     break;
                 default:
@@ -178,24 +172,15 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
             } catch (error) {
                 console.error('Failed to refresh webview:', error);
-                vscode.window.showErrorMessage('Failed to refresh Coding Music Player');
+                vscode.window.showErrorMessage('Failed to refresh YouTube Music Player');
             }
         }
     }
-
-    public togglePlay() {
-        if (this._view) {
-            this._view.webview.postMessage({ command: 'togglePlay' });
-            console.log('[Extension] Sent togglePlay to webview');
-        }
-    }
-
     private _getIframeSrc(): { url: string, iframeSrc: string } {
-        const URL = this._customUrl || getEnvConfig().MUSIC_PLAYER_URL || '';
-        const base = URL.includes('?') ? `${URL}&` : `${URL}?`;
+        const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
         return {
             url: URL,
-            iframeSrc: `${base}vscode=true&_t=${Date.now()}`, 
+            iframeSrc: `${URL}?_t=${Date.now()}&vscode=true`,
         }
     }
 
@@ -205,8 +190,8 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; frame-src *; img-src https: data: vscode-resource:; media-src https: data: blob:; connect-src https: wss:;">
-    <title>Coding Music Player</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data: vscode-resource:; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; media-src https: data: blob:; connect-src https: wss:; font-src 'self' data: https:; child-src 'none'; frame-src ${this._getIframeSrc().url}">
+    <title>YouTube Music Player</title>
     <style>
         html, body {
             margin: 0;
@@ -214,7 +199,6 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: transparent;
         }
         iframe {
             width: 100%;
@@ -225,31 +209,52 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
-    <div style="font-size: 10px; color: #888; padding: 4px; position: absolute; top:0; left:0; z-index: 100; pointer-events: none;">🎵 Coding with Music</div>
     <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
-
+    
     <script>
+        // Get VS Code API
         const vscode = acquireVsCodeApi();
-        let isPlaying = true;
         
+        console.log('[WebView Bridge] Initializing message bridge for YouTube Music extension');
+        
+        // Listen for messages from the iframe (your website)
         window.addEventListener('message', (event) => {
-            if (event.data && event.data.command === 'togglePlay') {
-                const iframe = document.querySelector('iframe');
-                if (iframe && iframe.contentWindow) {
-                    isPlaying = !isPlaying;
-                    const action = isPlaying ? 'playVideo' : 'pauseVideo';
-                    iframe.contentWindow.postMessage(JSON.stringify({
-                        event: 'command',
-                        func: action,
-                        args: []
-                    }), '*');
-                }
-            }
+            console.log('[WebView Bridge] Received postMessage event:', {
+                origin: event.origin,
+                data: event.data,
+                source: event.source === iframe?.contentWindow ? 'iframe' : 'other'
+            });
             
+            // Security: Verify the origin if needed
+            // if (event.origin !== '${this._getIframeSrc().url}') {
+            //     console.warn('[WebView Bridge] Message from unexpected origin:', event.origin);
+            //     return;
+            // }
+            
+            // Forward the message from iframe to VS Code extension
             if (event.data && event.data.type) {
+                console.log('[WebView Bridge] ✅ Forwarding valid message to VS Code extension:', {
+                    type: event.data.type,
+                    data: event.data
+                });
                 vscode.postMessage(event.data);
+            } else {
+                console.log('[WebView Bridge] ❌ Ignoring invalid message (no type field):', event.data);
             }
         });
+        
+        // Log when iframe loads
+        const iframe = document.querySelector('iframe');
+        if (iframe) {
+            iframe.onload = () => {
+                console.log('[WebView Bridge] ✅ YouTube Music iframe loaded successfully');
+            };
+            iframe.onerror = (error) => {
+                console.error('[WebView Bridge] ❌ Failed to load iframe:', error);
+            };
+        }
+        
+        console.log('[WebView Bridge] Message bridge setup complete');
     </script>
 </body>
 </html>`;
@@ -257,16 +262,13 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('🎵 Coding with Music extension is now active!');
-
-    let isPlayerVisible = true;
-    vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
+    console.log('🎵 YouTube Music Streamer extension is now active!');
 
     try {
-        const provider = new CodingMusicViewProvider(context.extensionUri);
+        const provider = new YouTubeMusicViewProvider(context.extensionUri);
 
         const viewProviderDisposable = vscode.window.registerWebviewViewProvider(
-            CodingMusicViewProvider.viewType, 
+            YouTubeMusicViewProvider.viewType, 
             provider,
             {
                 webviewOptions: {
@@ -277,50 +279,24 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(viewProviderDisposable);
 
         statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-        statusBarItem.text = "$(music) Coding with Music";
-        statusBarItem.tooltip = "Coding Music Player in Sidebar";
+        statusBarItem.text = "$(music) YouTube Music";
+        statusBarItem.tooltip = "YouTube Music Player in Sidebar";
         statusBarItem.show();
 
-        const refreshCommand = vscode.commands.registerCommand('codingWithMusic.refreshPlayer', () => {
+        const refreshCommand = vscode.commands.registerCommand('youtubeMusicStreamer.refreshPlayer', () => {
             provider.refresh();
         });
 
-        const openPlayerCommand = vscode.commands.registerCommand('codingWithMusic.openPlayer', () => {
-            if (!isPlayerVisible) {
-                isPlayerVisible = true;
-                vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
-            }
-            vscode.commands.executeCommand('coding-music-player.focus');
+        const openPlayerCommand = vscode.commands.registerCommand('youtubeMusicStreamer.openPlayer', () => {
+            vscode.commands.executeCommand('youtube-music-player.focus');
         });
 
-        const togglePlayCommand = vscode.commands.registerCommand('codingWithMusic.togglePlay', () => {
-            provider.togglePlay();
-        });
+        context.subscriptions.push(refreshCommand, openPlayerCommand, statusBarItem);
 
-        const toggleVisibilityCommand = vscode.commands.registerCommand('codingWithMusic.toggleVisibility', () => {
-            isPlayerVisible = !isPlayerVisible;
-            vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
-        });
-
-        const changeUrlCommand = vscode.commands.registerCommand('codingWithMusic.changeUrl', async () => {
-            const currentUrl = provider.getCustomUrl() || getEnvConfig().MUSIC_PLAYER_URL;
-            const newUrl = await vscode.window.showInputBox({
-                prompt: 'Enter a YouTube embed URL or any website URL',
-                value: currentUrl,
-                placeHolder: 'https://www.youtube.com/embed/...'
-            });
-            if (newUrl) {
-                provider.setCustomUrl(newUrl);
-                vscode.window.showInformationMessage(`Music URL updated!`);
-            }
-        });
-
-        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, toggleVisibilityCommand, changeUrlCommand, statusBarItem);
-
-        console.log('✅ Coding with Music extension activated successfully');
+        console.log('✅ YouTube Music Streamer extension activated successfully');
     } catch (error) {
-        console.error('❌ Failed to activate Coding with Music extension:', error);
-        vscode.window.showErrorMessage(`Failed to activate Coding with Music: ${error instanceof Error ? error.message : String(error)}`);
+        console.error('❌ Failed to activate YouTube Music Streamer extension:', error);
+        vscode.window.showErrorMessage(`Failed to activate YouTube Music Streamer: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
@@ -328,4 +304,4 @@ export function deactivate() {
     if (statusBarItem) {
         statusBarItem.dispose();
     }
-}
+} 

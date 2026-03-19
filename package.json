@@ -70,6 +70,12 @@
         "command": "codingWithMusic.toggleVisibility",
         "title": "Toggle Hide/Unhide Player",
         "category": "Coding with Music"
+      },
+      {
+        "command": "codingWithMusic.changeUrl",
+        "title": "Change Music URL",
+        "category": "Coding with Music",
+        "icon": "$(edit)"
       }
     ],
     "menus": {
@@ -77,7 +83,12 @@
         {
           "command": "codingWithMusic.refreshPlayer",
           "when": "view == coding-music-player",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "codingWithMusic.changeUrl",
+          "when": "view == coding-music-player",
+          "group": "navigation@2"
         }
       ]
     },

@@ -6,8 +6,18 @@ let statusBarItem: vscode.StatusBarItem | undefined = undefined;
 class CodingMusicViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'coding-music-player';
     private _view?: vscode.WebviewView;
+    private _customUrl?: string;
 
     constructor(private readonly _extensionUri: vscode.Uri) {}
+
+    public setCustomUrl(url: string) {
+        this._customUrl = url;
+        this.refresh();
+    }
+
+    public getCustomUrl(): string | undefined {
+        return this._customUrl;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -181,10 +191,11 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
     }
 
     private _getIframeSrc(): { url: string, iframeSrc: string } {
-        const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
+        const URL = this._customUrl || getEnvConfig().MUSIC_PLAYER_URL || '';
+        const base = URL.includes('?') ? `${URL}&` : `${URL}?`;
         return {
             url: URL,
-            iframeSrc: `${URL}${URL.includes('?') ? '&' : '?'}vscode=true&_t=${Date.now()}`,
+            iframeSrc: `${base}vscode=true&_t=${Date.now()}`, 
         }
     }
 
@@ -291,7 +302,20 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
         });
 
-        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, toggleVisibilityCommand, statusBarItem);
+        const changeUrlCommand = vscode.commands.registerCommand('codingWithMusic.changeUrl', async () => {
+            const currentUrl = provider.getCustomUrl() || getEnvConfig().MUSIC_PLAYER_URL;
+            const newUrl = await vscode.window.showInputBox({
+                prompt: 'Enter a YouTube embed URL or any website URL',
+                value: currentUrl,
+                placeHolder: 'https://www.youtube.com/embed/...'
+            });
+            if (newUrl) {
+                provider.setCustomUrl(newUrl);
+                vscode.window.showInformationMessage(`Music URL updated!`);
+            }
+        });
+
+        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, toggleVisibilityCommand, changeUrlCommand, statusBarItem);
 
         console.log('✅ Coding with Music extension activated successfully');
     } catch (error) {

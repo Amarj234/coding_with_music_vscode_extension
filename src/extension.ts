@@ -214,6 +214,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
+    <div style="font-size: 10px; color: #888; padding: 4px; position: absolute; top:0; left:0; z-index: 100;">Loading: ${this._getIframeSrc().url}</div>
     <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
 
     <script>

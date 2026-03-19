@@ -66,15 +66,22 @@ Listen to your favorite lo-fi beats and coding music while you work - no distrac
 
 ### Opening Your Music Player
 
-- **Quick Key**: `Ctrl+Shift+Y` (or `Cmd+Shift+Y` on Mac)
 - **File Explorer**: Click any option in "Coding Music Player" section
 - **Status Area**: Click the music icon
 - **Command Menu**: `Ctrl+Shift+P` → "Open Coding Music Player"
 
+### ⌨️ Keyboard Shortcuts
+
+We've added global shortcuts so you can control your music and workspace without ever leaving your code:
+
+- **Open Player:** `Ctrl+Shift+Y` (or `Cmd+Shift+Y` on Mac)
+- **Play/Pause Music:** `Alt+P` (or `Option+P` on Mac)
+- **Hide/Unhide Player Panel:** `Alt+H` (or `Option+H` on Mac)
+
 ### Playing Your Music
 
 1. **Browse** music, relax, and code with deep focus.
-2. **Control** everything with simple, easy-to-use buttons in the sidebar player.
+2. **Control** everything with simple, easy-to-use buttons in the sidebar player, or use the handy keyboard shortcuts above!
 
 ## ⚙️ Make it Yours
 

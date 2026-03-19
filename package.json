@@ -7,7 +7,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Amarj234/coding-with-music.git"
+    "url": "https://github.com/Amarj234/coding_with_music_vscode_extension.git"
   },
   "engines": {
     "vscode": "^1.60.0"

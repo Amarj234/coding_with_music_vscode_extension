@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Extension",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "preLaunchTask": "${workspaceFolder}/npm: compile",
+            "env": {
+                "MUSIC_PLAYER_URL": "https://music-player-f09.pages.dev"
+            }
+        },
+        {
+            "name": "Extension Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/out/test/**/*.js"
+            ],
+            "preLaunchTask": "${workspaceFolder}/npm: compile"
+        }
+    ]
+} 

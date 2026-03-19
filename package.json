@@ -49,13 +49,29 @@
         "command": "youtubeMusicStreamer.refreshPlayer",
         "title": "Refresh",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "youtubeMusicStreamer.togglePlay",
+        "title": "Toggle Play/Pause",
+        "category": "YouTube Music"
+      },
+      {
+        "command": "youtubeMusicStreamer.changeUrl",
+        "title": "Change Music URL",
+        "category": "YouTube Music",
+        "icon": "$(edit)"
       }
     ],
     "menus": {
       "view/title": [
         {
           "command": "youtubeMusicStreamer.refreshPlayer",
-          "group": "navigation",
+          "group": "navigation@1",
+          "when": "view == youtube-music-player"
+        },
+        {
+          "command": "youtubeMusicStreamer.changeUrl",
+          "group": "navigation@2",
           "when": "view == youtube-music-player"
         }
       ]
@@ -65,6 +81,11 @@
         "command": "youtubeMusicStreamer.openPlayer",
         "key": "ctrl+shift+y",
         "mac": "cmd+shift+y"
+      },
+      {
+        "command": "youtubeMusicStreamer.togglePlay",
+        "key": "alt+p",
+        "mac": "alt+p"
       }
     ],
     "configuration": {

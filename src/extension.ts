@@ -176,6 +176,12 @@ class YouTubeMusicViewProvider implements vscode.WebviewViewProvider {
         );
     }
 
+    public togglePlay() {
+        if (this._view) {
+            this._view.webview.postMessage({ command: 'togglePlay' });
+        }
+    }
+
     public refresh() {
         if (this._view) {
             try {
@@ -315,7 +321,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
         });
 
-        context.subscriptions.push(refreshCommand, openPlayerCommand, changeUrlCommand, statusBarItem);
+        const togglePlayCommand = vscode.commands.registerCommand('youtubeMusicStreamer.togglePlay', () => {
+            provider.togglePlay();
+        });
+
+        context.subscriptions.push(refreshCommand, openPlayerCommand, changeUrlCommand, togglePlayCommand, statusBarItem);
 
         console.log('✅ YouTube Music Streamer extension activated successfully');
     } catch (error) {

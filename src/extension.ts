@@ -328,12 +328,24 @@ export function activate(context: vscode.ExtensionContext) {
 
         const changeUrlCommand = vscode.commands.registerCommand('youtubeMusicStreamer.changeUrl', async () => {
             const currentUrl = provider.getCustomUrl() || getEnvConfig().MUSIC_PLAYER_URL;
-            const newUrl = await vscode.window.showInputBox({
-                prompt: 'Enter a YouTube embed URL or website link',
+            let newUrl = await vscode.window.showInputBox({
+                prompt: 'Enter a YouTube link or any website',
                 value: currentUrl,
-                placeHolder: 'https://...'
+                placeHolder: 'e.g. https://www.youtube.com/watch?v=...'
             });
+            
             if (newUrl) {
+                // Auto-convert youtu.be sharing links
+                if (newUrl.includes('youtu.be/')) {
+                    const id = newUrl.split('youtu.be/')[1].split('?')[0];
+                    newUrl = `https://www.youtube.com/embed/${id}`;
+                } 
+                // Auto-convert standard watch links
+                else if (newUrl.includes('youtube.com/watch?v=')) {
+                    const id = newUrl.split('v=')[1].split('&')[0];
+                    newUrl = `https://www.youtube.com/embed/${id}`;
+                }
+                
                 provider.setCustomUrl(newUrl);
                 vscode.window.showInformationMessage(`Music source updated!`);
             }

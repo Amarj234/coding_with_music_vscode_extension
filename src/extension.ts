@@ -184,7 +184,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
         const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
         return {
             url: URL,
-            iframeSrc: `${URL}${URL.includes('?') ? '&' : '?'}vscode=true&_t=${Date.now()}`, 
+            iframeSrc: `${URL}?_t=${Date.now()}&vscode=true`,
         }
     }
 
@@ -194,7 +194,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; frame-src *; img-src https: data: vscode-resource:; media-src https: data: blob:; connect-src https: wss:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data: vscode-resource:; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; media-src https: data: blob:; connect-src https: wss:; font-src 'self' data: https:; child-src 'none'; frame-src ${this._getIframeSrc().url}">
     <title>Coding Music Player</title>
     <style>
         html, body {

@@ -172,6 +172,14 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
             }
         }
     }
+
+    public togglePlay() {
+        if (this._view) {
+            this._view.webview.postMessage({ command: 'togglePlay' });
+            console.log('[Extension] Sent togglePlay to webview');
+        }
+    }
+
     private _getIframeSrc(): { url: string, iframeSrc: string } {
         const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
         return {
@@ -207,6 +215,33 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 </head>
 <body>
     <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        let isPlaying = true;
+        
+        window.addEventListener('message', (event) => {
+            // Check if message is from the extension host
+            if (event.data && event.data.command === 'togglePlay') {
+                console.log('[WebView Bridge] Received togglePlay command');
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    isPlaying = !isPlaying;
+                    const action = isPlaying ? 'playVideo' : 'pauseVideo';
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: action,
+                        args: []
+                    }), '*'); // Using '*' since the iframe SRC depends on config
+                }
+            }
+            
+            // Forward iframe messages to VS Code
+            if (event.data && event.data.type) {
+                vscode.postMessage(event.data);
+            }
+        });
+    </script>
 </body>
 </html>`;
     }
@@ -242,7 +277,11 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.commands.executeCommand('coding-music-player.focus');
         });
 
-        context.subscriptions.push(refreshCommand, openPlayerCommand, statusBarItem);
+        const togglePlayCommand = vscode.commands.registerCommand('codingWithMusic.togglePlay', () => {
+            provider.togglePlay();
+        });
+
+        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, statusBarItem);
 
         console.log('✅ Coding with Music extension activated successfully');
     } catch (error) {

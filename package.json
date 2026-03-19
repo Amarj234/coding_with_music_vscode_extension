@@ -51,6 +51,11 @@
         "command": "codingWithMusic.refreshPlayer",
         "title": "Refresh",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "codingWithMusic.togglePlay",
+        "title": "Toggle Play/Pause",
+        "category": "Coding with Music"
       }
     ],
     "menus": {
@@ -67,6 +72,11 @@
         "command": "codingWithMusic.openPlayer",
         "key": "ctrl+shift+y",
         "mac": "cmd+shift+y"
+      },
+      {
+        "command": "codingWithMusic.togglePlay",
+        "key": "alt+p",
+        "mac": "alt+p"
       }
     ],
     "configuration": {

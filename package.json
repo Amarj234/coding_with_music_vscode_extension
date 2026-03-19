@@ -35,7 +35,7 @@
           "type": "webview",
           "id": "coding-music-player",
           "name": "Coding Music Player",
-          "when": "true",
+          "when": "codingWithMusic.isPlayerVisible",
           "visibility": "visible"
         }
       ]
@@ -55,6 +55,11 @@
       {
         "command": "codingWithMusic.togglePlay",
         "title": "Toggle Play/Pause",
+        "category": "Coding with Music"
+      },
+      {
+        "command": "codingWithMusic.toggleVisibility",
+        "title": "Toggle Hide/Unhide Player",
         "category": "Coding with Music"
       }
     ],
@@ -77,6 +82,11 @@
         "command": "codingWithMusic.togglePlay",
         "key": "alt+p",
         "mac": "alt+p"
+      },
+      {
+        "command": "codingWithMusic.toggleVisibility",
+        "key": "alt+h",
+        "mac": "alt+h"
       }
     ],
     "configuration": {

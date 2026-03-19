@@ -250,6 +250,9 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 export function activate(context: vscode.ExtensionContext) {
     console.log('🎵 Coding with Music extension is now active!');
 
+    let isPlayerVisible = true;
+    vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
+
     try {
         const provider = new CodingMusicViewProvider(context.extensionUri);
 
@@ -274,6 +277,10 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         const openPlayerCommand = vscode.commands.registerCommand('codingWithMusic.openPlayer', () => {
+            if (!isPlayerVisible) {
+                isPlayerVisible = true;
+                vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
+            }
             vscode.commands.executeCommand('coding-music-player.focus');
         });
 
@@ -281,7 +288,12 @@ export function activate(context: vscode.ExtensionContext) {
             provider.togglePlay();
         });
 
-        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, statusBarItem);
+        const toggleVisibilityCommand = vscode.commands.registerCommand('codingWithMusic.toggleVisibility', () => {
+            isPlayerVisible = !isPlayerVisible;
+            vscode.commands.executeCommand('setContext', 'codingWithMusic.isPlayerVisible', isPlayerVisible);
+        });
+
+        context.subscriptions.push(refreshCommand, openPlayerCommand, togglePlayCommand, toggleVisibilityCommand, statusBarItem);
 
         console.log('✅ Coding with Music extension activated successfully');
     } catch (error) {

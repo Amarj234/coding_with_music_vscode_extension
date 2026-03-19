@@ -184,7 +184,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
         const URL = getEnvConfig().MUSIC_PLAYER_URL || '';
         return {
             url: URL,
-            iframeSrc: `${URL}`, 
+            iframeSrc: `${URL}${URL.includes('?') ? '&' : '?'}vscode=true&_t=${Date.now()}`, 
         }
     }
 
@@ -194,7 +194,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; frame-src *;">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; frame-src *; img-src https: data: vscode-resource:; media-src https: data: blob:; connect-src https: wss:;">
     <title>Coding Music Player</title>
     <style>
         html, body {
@@ -214,7 +214,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
     </style>
 </head>
 <body>
-    <div style="font-size: 10px; color: #888; padding: 4px; position: absolute; top:0; left:0; z-index: 100;">Loading: ${this._getIframeSrc().url}</div>
+    <div style="font-size: 10px; color: #888; padding: 4px; position: absolute; top:0; left:0; z-index: 100; pointer-events: none;">🎵 Coding with Music</div>
     <iframe src="${this._getIframeSrc().iframeSrc}" allow="autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen ></iframe>
 
     <script>
@@ -222,9 +222,7 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
         let isPlaying = true;
         
         window.addEventListener('message', (event) => {
-            // Check if message is from the extension host
             if (event.data && event.data.command === 'togglePlay') {
-                console.log('[WebView Bridge] Received togglePlay command');
                 const iframe = document.querySelector('iframe');
                 if (iframe && iframe.contentWindow) {
                     isPlaying = !isPlaying;
@@ -233,11 +231,10 @@ class CodingMusicViewProvider implements vscode.WebviewViewProvider {
                         event: 'command',
                         func: action,
                         args: []
-                    }), '*'); // Using '*' since the iframe SRC depends on config
+                    }), '*');
                 }
             }
             
-            // Forward iframe messages to VS Code
             if (event.data && event.data.type) {
                 vscode.postMessage(event.data);
             }

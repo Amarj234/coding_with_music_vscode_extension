@@ -35,7 +35,7 @@
           "type": "webview",
           "id": "coding-music-player",
           "name": "Coding Music Player",
-          "when": "codingWithMusic.isPlayerVisible",
+          "when": "true",
           "visibility": "visible"
         }
       ]
